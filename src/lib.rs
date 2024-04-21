@@ -29,6 +29,10 @@ use bevy::{
     prelude::*,
     text::BreakLineOn,
 };
+use clipboard::ClipboardEvent;
+
+/// Clipboard support for text input.
+pub mod clipboard;
 
 /// A Bevy `Plugin` providing the systems and assets required to make a [`TextInputBundle`] work.
 pub struct TextInputPlugin;
@@ -49,7 +53,8 @@ impl Plugin for TextInputPlugin {
                 (
                     create,
                     keyboard,
-                    update_value.after(keyboard),
+                    clipboard,
+                    update_value.after(keyboard).after(clipboard),
                     blink_cursor,
                     show_hide_cursor,
                     update_style,
@@ -246,6 +251,7 @@ impl<'w, 's> InnerText<'w, 's> {
 
 fn keyboard(
     mut events: EventReader<KeyboardInput>,
+    mut res_keys: Res<ButtonInput<KeyCode>>,
     mut text_input_query: Query<(
         Entity,
         &TextInputSettings,
@@ -257,6 +263,10 @@ fn keyboard(
     mut submit_writer: EventWriter<TextInputSubmitEvent>,
 ) {
     if events.is_empty() {
+        return;
+    }
+
+    if res_keys.pressed(KeyCode::ControlLeft) || res_keys.pressed(KeyCode::ControlRight) {
         return;
     }
 
@@ -385,6 +395,30 @@ fn update_value(
             cursor_pos.0,
             &mut text.sections,
         );
+    }
+}
+
+fn clipboard(
+    mut events: EventReader<ClipboardEvent>,
+    mut q_text_input: Query<(
+        &mut TextInputValue,
+        &mut TextInputCursorPos,
+        &TextInputInactive,
+    )>,
+) {
+    for event in events.read() {
+        if let ClipboardEvent::Paste(value) = event {
+            for (mut text_input, mut cursor_pos, inactive) in &mut q_text_input {
+                if inactive.0 {
+                    continue;
+                }
+
+                let value = value.replace("\n", "").replace("\r", "");
+
+                text_input.0.insert_str(cursor_pos.0, &value);
+                cursor_pos.0 += value.chars().count();
+            }
+        }
     }
 }
 
