@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 #[cfg(not(target_family = "wasm"))]
 use arboard::Clipboard;
 use bevy::prelude::*;
@@ -38,6 +36,33 @@ pub enum ClipboardEvent {
     Paste(String),
 }
 
+#[cfg(not(target_family = "wasm"))]
+fn keyboard(keys: Res<ButtonInput<KeyCode>>, mut submit_writer: EventWriter<ClipboardEvent>) {
+    if keys.just_pressed(KeyCode::Insert) {
+        request_clipboard_content(submit_writer);
+        return;
+    }
+
+    if keys.just_pressed(KeyCode::Copy) {
+        submit_writer.send(ClipboardEvent::Copy);
+        return;
+    }
+
+    if !keys.pressed(KeyCode::ControlLeft) && !keys.pressed(KeyCode::ControlRight) {
+        return;
+    }
+
+    if keys.just_pressed(KeyCode::KeyC) {
+        submit_writer.send(ClipboardEvent::Copy);
+        return;
+    }
+
+    if keys.just_pressed(KeyCode::KeyV) {
+        request_clipboard_content(submit_writer);
+    }
+}
+
+#[cfg(target_family = "wasm")]
 fn keyboard(
     mut commands: Commands,
     keys: Res<ButtonInput<KeyCode>>,
@@ -64,7 +89,6 @@ fn keyboard(
 
     if keys.just_pressed(KeyCode::KeyV) {
         request_clipboard_content(commands, submit_writer);
-        return;
     }
 }
 
@@ -84,20 +108,20 @@ fn async_clipboard(
     }
 }
 
+#[cfg(not(target_family = "wasm"))]
+fn request_clipboard_content(mut ev_clipboard: EventWriter<ClipboardEvent>) {
+    ev_clipboard.send(ClipboardEvent::Paste(
+        get_clipboard_content().unwrap_or_default(),
+    ));
+}
+
+#[cfg(target_family = "wasm")]
 fn request_clipboard_content(
     mut commands: Commands,
     mut ev_clipboard: EventWriter<ClipboardEvent>,
 ) {
-    #[cfg(not(target_family = "wasm"))]
-    ev_clipboard.send(ClipboardEvent::Paste(
-        get_clipboard_content().unwrap_or_default(),
-    ));
-
-    #[cfg(target_family = "wasm")]
-    {
-        let receiver = get_clipboard_content();
-        commands.spawn(ClipboardContentReceiver(receiver));
-    }
+    let receiver = get_clipboard_content();
+    commands.spawn(ClipboardContentReceiver(receiver));
 }
 
 #[cfg(not(target_family = "wasm"))]
@@ -114,7 +138,6 @@ fn get_clipboard_content() -> Receiver<String> {
         let value = JsFuture::from(clipboard.read_text()).await.unwrap();
         let value = value.as_string().unwrap_or_default();
         s.send(value).await.unwrap();
-        // ev_clipboard.send(ClipboardEvent::Paste(value.as_string().unwrap_or_default()));
     });
 
     r

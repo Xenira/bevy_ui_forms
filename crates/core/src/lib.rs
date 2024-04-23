@@ -29,10 +29,27 @@ use bevy::{
     prelude::*,
     text::BreakLineOn,
 };
-use clipboard::ClipboardEvent;
 
 /// Clipboard support for text input.
+#[cfg(feature = "clipboard")]
 pub mod clipboard;
+#[cfg(feature = "clipboard")]
+use clipboard::ClipboardEvent;
+#[cfg(feature = "clipboard")]
+use clipboard::ClipboardPlugin;
+
+/// Forms
+pub mod form;
+
+use form::{
+    FormElementFocus, FormElementInvalid, FormElementOptional, FormElementValid,
+    FormValidationError,
+};
+// #[macro_use]
+// pub use f
+/// Derive macro available if serde is built with `features = ["derive"]`.
+#[cfg(feature = "derive")]
+pub use bevy_ui_forms_form_derive::form_struct;
 
 /// A Bevy `Plugin` providing the systems and assets required to make a [`TextInputBundle`] work.
 pub struct TextInputPlugin;
@@ -47,26 +64,37 @@ impl Plugin for TextInputPlugin {
             |bytes: &[u8], _path: String| { Font::try_from_bytes(bytes.to_vec()).unwrap() }
         );
 
+        #[cfg(feature = "clipboard")]
+        app.add_plugins(ClipboardPlugin);
+
         app.add_event::<TextInputSubmitEvent>()
             .add_systems(
                 Update,
                 (
                     create,
                     keyboard,
+                    #[cfg(feature = "clipboard")]
                     clipboard,
+                    #[cfg(feature = "clipboard")]
                     update_value.after(keyboard).after(clipboard),
+                    #[cfg(not(feature = "clipboard"))]
+                    update_value.after(keyboard),
+                    validate.after(update_value),
+                    focus_interaction,
+                    focus_added.after(focus_interaction),
                     blink_cursor,
-                    show_hide_cursor,
+                    show_hide_cursor.after(focus_added),
                     update_style,
                     set_placeholder.after(create),
                 ),
             )
             .register_type::<TextInputSettings>()
             .register_type::<TextInputTextStyle>()
-            .register_type::<TextInputInactive>()
+            .register_type::<TextInputActive>()
             .register_type::<TextInputCursorTimer>()
             .register_type::<TextInputInner>()
-            .register_type::<TextInputValue>();
+            .register_type::<TextInputValue>()
+            .register_type::<TextInputPlaceholder>();
     }
 }
 
@@ -92,7 +120,7 @@ pub struct TextInputBundle {
     /// A component containing the Bevy `TextStyle` that will be used when creating the text input's inner Bevy `TextBundle`.
     pub text_style: TextInputTextStyle,
     /// A component containing a value indicating whether the text input is active or not.
-    pub inactive: TextInputInactive,
+    pub active: TextInputActive,
     /// A component that manages the cursor's blinking.
     pub cursor_timer: TextInputCursorTimer,
     /// A component containing the current text cursor position.
@@ -138,8 +166,8 @@ impl TextInputBundle {
     }
 
     /// Returns this [`TextInputBundle`] with a new [`TextInputInactive`] containing the provided `bool`.
-    pub fn with_inactive(mut self, inactive: bool) -> Self {
-        self.inactive = TextInputInactive(inactive);
+    pub fn with_active(mut self, active: bool) -> Self {
+        self.active = TextInputActive(active);
         self
     }
 
@@ -156,7 +184,7 @@ pub struct TextInputTextStyle(pub TextStyle);
 
 /// If true, the text input does not respond to keyboard events and the cursor is hidden.
 #[derive(Component, Default, Reflect)]
-pub struct TextInputInactive(pub bool);
+pub struct TextInputActive(pub bool);
 
 /// A component that manages the cursor's blinking.
 #[derive(Component, Reflect)]
@@ -199,7 +227,7 @@ pub struct TextInputPlaceholder {
 
 impl TextInputPlaceholder {
     /// Returns the style to use when rendering the placeholder text.
-    /// Uses the own style if it exists, otherwise uses the input style with half opacity.
+    /// Uses the own style if it exists, otherwise uses the input style with quater opacity.
     pub fn get_style(&self, input_text_style: &TextStyle) -> TextStyle {
         if let Some(style) = &self.text_style {
             style.clone()
@@ -251,15 +279,17 @@ impl<'w, 's> InnerText<'w, 's> {
 
 fn keyboard(
     mut events: EventReader<KeyboardInput>,
-    mut res_keys: Res<ButtonInput<KeyCode>>,
-    mut text_input_query: Query<(
-        Entity,
-        &TextInputSettings,
-        &TextInputInactive,
-        &mut TextInputValue,
-        &mut TextInputCursorPos,
-        &mut TextInputCursorTimer,
-    )>,
+    res_keys: Res<ButtonInput<KeyCode>>,
+    mut text_input_query: Query<
+        (
+            Entity,
+            &TextInputSettings,
+            &mut TextInputValue,
+            &mut TextInputCursorPos,
+            &mut TextInputCursorTimer,
+        ),
+        With<FormElementFocus>,
+    >,
     mut submit_writer: EventWriter<TextInputSubmitEvent>,
 ) {
     if events.is_empty() {
@@ -270,13 +300,9 @@ fn keyboard(
         return;
     }
 
-    for (input_entity, settings, inactive, mut text_input, mut cursor_pos, mut cursor_timer) in
+    for (input_entity, settings, mut text_input, mut cursor_pos, mut cursor_timer) in
         &mut text_input_query
     {
-        if inactive.0 {
-            continue;
-        }
-
         let mut submitted_value = None;
 
         for event in events.read() {
@@ -398,22 +424,37 @@ fn update_value(
     }
 }
 
+fn validate(
+    mut commands: Commands,
+    q_text_input: Query<
+        (Entity, &TextInputValue, Option<&FormElementOptional>),
+        Changed<TextInputValue>,
+    >,
+) {
+    for (entity, text_input, optional) in &q_text_input {
+        if text_input.0.is_empty() && optional.is_none() {
+            commands
+                .entity(entity)
+                .insert(FormElementInvalid(FormValidationError::Required(entity)))
+                .remove::<FormElementValid>();
+        } else {
+            commands
+                .entity(entity)
+                .remove::<FormElementInvalid>()
+                .insert(FormElementValid);
+        }
+    }
+}
+
+#[cfg(feature = "clipboard")]
 fn clipboard(
     mut events: EventReader<ClipboardEvent>,
-    mut q_text_input: Query<(
-        &mut TextInputValue,
-        &mut TextInputCursorPos,
-        &TextInputInactive,
-    )>,
+    mut q_text_input: Query<(&mut TextInputValue, &mut TextInputCursorPos), With<FormElementFocus>>,
 ) {
     for event in events.read() {
         if let ClipboardEvent::Paste(value) = event {
-            for (mut text_input, mut cursor_pos, inactive) in &mut q_text_input {
-                if inactive.0 {
-                    continue;
-                }
-
-                let value = value.replace("\n", "").replace("\r", "");
+            for (mut text_input, mut cursor_pos) in &mut q_text_input {
+                let value = value.replace(['\n', '\r'], "");
 
                 text_input.0.insert_str(cursor_pos.0, &value);
                 cursor_pos.0 += value.chars().count();
@@ -430,13 +471,14 @@ fn create(
             &TextInputTextStyle,
             &TextInputValue,
             &TextInputCursorPos,
-            &TextInputInactive,
+            &TextInputActive,
             &TextInputSettings,
         ),
         Added<TextInputValue>,
     >,
 ) {
-    for (entity, style, text_input, cursor_pos, inactive, settings) in &query {
+    for (entity, style, text_input, cursor_pos, active, settings) in &query {
+        info!("Creating text input");
         let mut sections = vec![
             // Pre-cursor
             TextSection {
@@ -447,7 +489,7 @@ fn create(
             TextSection {
                 style: TextStyle {
                     font: CURSOR_HANDLE,
-                    color: if inactive.0 {
+                    color: if !active.0 {
                         Color::NONE
                     } else {
                         style.0.color
@@ -495,6 +537,11 @@ fn create(
             })
             .id();
 
+        // Set focus to new entity when spawned with active set to true.
+        if active.0 {
+            commands.entity(entity).insert(FormElementFocus);
+        }
+
         commands.entity(overflow_container).add_child(text);
         commands.entity(entity).add_child(overflow_container);
     }
@@ -507,18 +554,18 @@ fn show_hide_cursor(
             Entity,
             &TextInputTextStyle,
             &mut TextInputCursorTimer,
-            &TextInputInactive,
+            &TextInputActive,
         ),
-        Changed<TextInputInactive>,
+        Changed<TextInputActive>,
     >,
     mut inner_text: InnerText,
 ) {
-    for (entity, style, mut cursor_timer, inactive) in &mut input_query {
+    for (entity, style, mut cursor_timer, active) in &mut input_query {
         let Some(mut text) = inner_text.get_mut(entity) else {
             continue;
         };
 
-        text.sections[1].style.color = if inactive.0 {
+        text.sections[1].style.color = if !active.0 {
             Color::NONE
         } else {
             style.0.color
@@ -528,22 +575,58 @@ fn show_hide_cursor(
     }
 }
 
-// Blinks the cursor on a timer.
-fn blink_cursor(
-    mut input_query: Query<(
-        Entity,
-        &TextInputTextStyle,
-        &mut TextInputCursorTimer,
-        Ref<TextInputInactive>,
-    )>,
-    mut inner_text: InnerText,
-    time: Res<Time>,
+fn focus_interaction(
+    mut commands: Commands,
+    q_interaction: Query<(Entity, &Interaction)>,
+    mut q_text_input: Query<(Entity, &mut TextInputActive), With<TextInputValue>>,
 ) {
-    for (entity, style, mut cursor_timer, inactive) in &mut input_query {
-        if inactive.0 {
+    for (entity, interaction) in &mut q_interaction.iter() {
+        if *interaction != Interaction::Pressed {
             continue;
         }
 
+        if let Ok((interacted_entity, mut active)) = q_text_input.get_mut(entity) {
+            commands.entity(interacted_entity).insert(FormElementFocus);
+            active.0 = true;
+        } else {
+            for (interacted_entity, mut active) in q_text_input.iter_mut() {
+                commands
+                    .entity(interacted_entity)
+                    .remove::<FormElementFocus>();
+                active.0 = false;
+            }
+        }
+    }
+}
+
+fn focus_added(
+    mut commands: Commands,
+    q_focus_added: Query<Entity, Added<FormElementFocus>>,
+    mut q_focus: Query<(Entity, &mut TextInputActive)>,
+) {
+    for entity in &q_focus_added {
+        for (other_entity, mut active) in &mut q_focus {
+            if other_entity != entity {
+                commands.entity(other_entity).remove::<FormElementFocus>();
+                active.0 = false;
+                continue;
+            }
+
+            active.0 = true;
+        }
+    }
+}
+
+// Blinks the cursor on a timer.
+fn blink_cursor(
+    mut input_query: Query<
+        (Entity, &TextInputTextStyle, &mut TextInputCursorTimer),
+        With<FormElementFocus>,
+    >,
+    mut inner_text: InnerText,
+    time: Res<Time>,
+) {
+    for (entity, style, mut cursor_timer) in &mut input_query {
         if cursor_timer.is_changed() && cursor_timer.should_reset {
             cursor_timer.timer.reset();
             cursor_timer.should_reset = false;
@@ -574,7 +657,7 @@ fn set_placeholder(
     q_text_changed: Query<
         (
             Entity,
-            &Children,
+            Option<&Children>,
             &TextInputValue,
             &TextInputTextStyle,
             &TextInputPlaceholder,
@@ -586,6 +669,7 @@ fn set_placeholder(
     for (entity, children, text, style, placeholder) in &q_text_changed {
         let mut placeholder_inner = children
             .iter()
+            .flat_map(|children| children.iter())
             .filter_map(|child| q_inner.get(*child).ok())
             .peekable();
 
