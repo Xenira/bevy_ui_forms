@@ -1,7 +1,9 @@
 //! An example showing a more advanced implementation with focus.
 
 use bevy::prelude::*;
-use bevy_simple_text_input::{clipboard::ClipboardPlugin, TextInputBundle, TextInputInactive, TextInputPlugin};
+use bevy_ui_forms::{
+    clipboard::ClipboardPlugin, TextInputActive, TextInputBundle, TextInputPlugin,
+};
 
 const BORDER_COLOR_ACTIVE: Color = Color::rgb(0.75, 0.52, 0.99);
 const BORDER_COLOR_INACTIVE: Color = Color::rgb(0.25, 0.25, 0.25);
@@ -56,27 +58,19 @@ fn setup(mut commands: Commands) {
                         color: TEXT_COLOR,
                         ..default()
                     })
-                    .with_value("Click Me")
-                    .with_inactive(true),
+                    .with_value("Click Me"),
             ));
         });
 }
 
 fn focus(
-    query: Query<(Entity, &Interaction), Changed<Interaction>>,
-    mut text_input_query: Query<(Entity, &mut TextInputInactive, &mut BorderColor)>,
+    mut text_input_query: Query<(&TextInputActive, &mut BorderColor), Changed<TextInputActive>>,
 ) {
-    for (interaction_entity, interaction) in &query {
-        if *interaction == Interaction::Pressed {
-            for (entity, mut inactive, mut border_color) in &mut text_input_query {
-                if entity == interaction_entity {
-                    inactive.0 = false;
-                    *border_color = BORDER_COLOR_ACTIVE.into();
-                } else {
-                    inactive.0 = true;
-                    *border_color = BORDER_COLOR_INACTIVE.into();
-                }
-            }
+    for (active, mut border_color) in &mut text_input_query {
+        if active.0 {
+            *border_color = BORDER_COLOR_ACTIVE.into();
+        } else {
+            *border_color = BORDER_COLOR_INACTIVE.into();
         }
     }
 }

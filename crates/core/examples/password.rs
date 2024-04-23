@@ -1,7 +1,7 @@
 //! An example showing a very basic implementation.
 
 use bevy::prelude::*;
-use bevy_simple_text_input::{clipboard::ClipboardPlugin, TextInputBundle, TextInputPlugin, TextInputSubmitEvent};
+use bevy_ui_forms::{TextInputBundle, TextInputPlugin, TextInputSettings, TextInputSubmitEvent};
 
 const BORDER_COLOR_ACTIVE: Color = Color::rgb(0.75, 0.52, 0.99);
 const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
@@ -11,7 +11,6 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(TextInputPlugin)
-        .add_plugins(ClipboardPlugin)
         .add_systems(Startup, setup)
         .add_systems(Update, listener)
         .run();
@@ -35,7 +34,7 @@ fn setup(mut commands: Commands) {
             parent.spawn((
                 NodeBundle {
                     style: Style {
-                        width: Val::Px(325.0),
+                        width: Val::Px(200.0),
                         border: UiRect::all(Val::Px(5.0)),
                         padding: UiRect::all(Val::Px(5.0)),
                         ..default()
@@ -45,12 +44,18 @@ fn setup(mut commands: Commands) {
                     ..default()
                 },
                 TextInputBundle::default()
+                    .with_value("password")
+                    .with_placeholder("Password", None)
                     .with_text_style(TextStyle {
                         font_size: 40.,
                         color: TEXT_COLOR,
                         ..default()
                     })
-                    .with_placeholder("Type something", None),
+                    .with_settings(TextInputSettings {
+                        mask_character: Some('*'),
+                        ..default()
+                    })
+                    .with_active(true),
             ));
         });
 }

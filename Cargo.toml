@@ -1,38 +1,17 @@
-[package]
-name = "bevy_simple_text_input"
-version = "0.6.1"
+[workspace]
+members = ["crates/core", "crates/macros/*"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
 edition = "2021"
-license = "MIT OR Apache-2.0"
+license = "MPL-2.0"
 description = "Bevy plugin for a simple single-line text input widget."
-repository = "https://github.com/rparrett/bevy_simple_text_input"
-homepage = "https://github.com/rparrett/bevy_simple_text_input"
+repository = "https://github.com/xenira/bevy_not_so_simple_text_input"
+homepage = "https://github.com/xenira/bevy_not_so_simple_text_input"
 documentation = "https://docs.rs/bevy_simple_text_input"
-keywords = ["bevy", "gamedev"]
+keywords = ["bevy", "gamedev", "ui", "forms", "input"]
 categories = ["game-development"]
-readme = "README.md"
+readme = "README.adoc"
 exclude = [".github"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies.bevy]
-version = "0.13"
-default-features = false
-features = ["bevy_ui", "bevy_asset", "bevy_text"]
-
-[target.'cfg(not(target_family = "wasm"))'.dependencies]
-arboard = "3.3.2"
-
-[target.wasm32-unknown-unknown.dependencies]
-web-sys = { version = "0.3.68", features = ["Clipboard", "Window", "Navigator", "Permissions"] }
-wasm-bindgen-futures = "0.4.41"
-async-channel = "2.2.1"
-
-[dev-dependencies.bevy]
-version = "0.13"
-default-features = true
-
-[lints.rust]
-missing_docs = "warn"
-
-[lints.clippy]
-type_complexity = "allow"
+authors = ["xenira <bevy_ui_forms@3.141.rip>"]

@@ -1,0 +1,114 @@
+= bevy_ui_forms
+Xenira <xenira@3.141.rip>
+:toc:
+:toc-placement!:
+:toclevels: 2
+:sectnums:
+:icons: font
+:source-highlighter: highlight.js
+
+image:https://img.shields.io/crates/v/bevy_simple_text_input.svg[crates.io, link=https://crates.io/crates/bevy_simple_text_input]
+image:https://docs.rs/bevy_simple_text_input/badge.svg[docs, link=https://docs.rs/bevy_simple_text_input]
+image:https://img.shields.io/badge/Bevy%20tracking-released%20version-lightblue[Following released Bevy versions, link=https://bevyengine.org/learn/book/plugin-development/#main-branch-tracking]
+
+Adds forms to `bevy_ui`.
+
+This started out as a fork of https://github.com/rparrett/bevy_simple_text_input[`bevy_simple_text_input`] with a slightly more ambitious single-line text input widget for `bevy_ui`.
+
+It now includes some form logic in addition to the text input widget.
+
+There also is a macro for creating forms from a struct.
+
+![animated screenshot of text input widget gaining focus and text typed and submitted](assets/screenshot.gif)
+
+toc::[]
+
+## Features extended from the original
+
+- Character masking
+- Placeholder text
+- Clipboard support
+- Focus (one active text input at a time and auto-focus on click)
+- Form logic
+- Form 'derive' macro
+
+## Usage
+
+IMPORTANT: Code and examples in the main branch are under development and may not be compatible with the released version on crates.io. The https://github.com/rparrett/bevy_simple_text_input/tree/latest[latest] branch will contain the code from the most recent release.
+
+See https://github.com/rparrett/bevy_simple_text_input/blob/latest/examples/basic.rs[`examples/basic.rs`].
+
+### Form macro
+
+.Macro example
+```rust
+use bevy::prelude::*;
+use bevy_not_so_simple_text_input::form::*;
+use bevy_not_so_simple_text_input::form_struct;
+use bevy_not_so_simple_text_input::{TextInputBundle, TextInputSettings, TextInputValue};
+
+#[form_struct]
+#[derive(Debug, Clone)]
+pub struct LoginData {
+    #[form_field(active)]
+    #[text_box(placeholder = "Username")]
+    pub username: String,
+    #[text_box(placeholder = "Password", mask = '*')]
+    pub password: String,
+}
+```
+.Usage
+```rust
+fn setup(mut commands: Commands) {
+    commands.spawn((
+        LoginDataForm,
+        NodeBundle {
+            style: Style {
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(8.0),
+                align_self: AlignSelf::Stretch,
+                align_items: AlignItems::Stretch,
+                ..default()
+            },
+            ..default()
+        },
+    ));
+}
+fn on_form_submit(
+    mut ev_login_form: EventReader<LoginDataFormEvent>,
+) {
+    for ev in ev_login_form.read() {
+        match &ev.event {
+            FormEvent::Submit(data) => {
+              // do something with the data
+            }
+            _ => {}
+        }
+    }
+}
+
+```
+
+## Compatibility
+
+.Compatibility with Bevy versions
+[options="header"]
+|====
+| `bevy_not_so_simple_text_input` | `bevy`
+| `0.1`                           | `0.13`
+|====
+
+## Contributing
+
+Please feel free to open a PR, but its best to open an issue first to discuss the changes you would like to make.
+
+Please keep PRs small and scoped to a single feature or fix.
+
+## Alternatives
+
+If you need more features, check out https://github.com/rparrett/bevy_simple_text_input[`bevy_simple_text_input`], https://github.com/StaffEngineer/bevy_cosmic_edit[`bevy_cosmic_edit`] or https://github.com/mvlabat/bevy_egui[`bevy_egui`].
+
+## License
+This project is licensed under the https://www.mozilla.org/en-US/MPL/[Mozilla Public License (MPL) 2.0].
+
+The original https://github.com/rparrett/bevy_simple_text_input[`bevy_simple_text_input`] is licensed under the http://opensource.org/licenses/MIT[MIT] or http://www.apache.org/licenses/LICENSE-2.0[Apache 2.0] license.
