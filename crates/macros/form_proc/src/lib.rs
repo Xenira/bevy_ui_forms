@@ -1,4 +1,4 @@
-//! Derive macro for generating a form plugin
+//! Proc macro for generating a form plugin
 //!
 //! # Example
 //! ```no_run
@@ -85,7 +85,7 @@ enum FormFieldType {
     TextBox(TextBoxOpts),
 }
 
-/// Derive macro for generating a form plugin
+/// Proc macro for generating a form plugin
 /// This macro is dirty and a struct should be placed in a separate file
 #[proc_macro_attribute]
 pub fn form_struct(_args: TokenStream, input: TokenStream) -> TokenStream {

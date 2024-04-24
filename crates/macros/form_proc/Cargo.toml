@@ -1,5 +1,5 @@
 [package]
-name = "bevy_ui_forms_form_derive"
+name = "bevy_ui_forms_form_proc"
 version.workspace = true
 edition.workspace = true
 description = "A bevy plugin for creating forms."
@@ -8,7 +8,7 @@ homepage.workspace = true
 documentation.workspace = true
 keywords.workspace = true
 categories.workspace = true
-readme = "../../README.adoc"
+readme = "../../../README.adoc"
 license.workspace = true
 authors.workspace = true
 rust-version = "1.64.0"

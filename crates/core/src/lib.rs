@@ -49,7 +49,7 @@ use form::{
 // pub use f
 /// Derive macro available if serde is built with `features = ["derive"]`.
 #[cfg(feature = "derive")]
-pub use bevy_ui_forms_form_derive::form_struct;
+pub use bevy_ui_forms_form_proc::form_struct;
 
 /// A Bevy `Plugin` providing the systems and assets required to make a [`TextInputBundle`] work.
 pub struct TextInputPlugin;

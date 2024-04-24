@@ -64,12 +64,12 @@ fn keyboard(keys: Res<ButtonInput<KeyCode>>, mut submit_writer: EventWriter<Clip
 
 #[cfg(target_family = "wasm")]
 fn keyboard(
-    mut commands: Commands,
+    commands: Commands,
     keys: Res<ButtonInput<KeyCode>>,
     mut submit_writer: EventWriter<ClipboardEvent>,
 ) {
     if keys.just_pressed(KeyCode::Insert) {
-        request_clipboard_content(commands, submit_writer);
+        request_clipboard_content(commands);
         return;
     }
 
@@ -88,7 +88,7 @@ fn keyboard(
     }
 
     if keys.just_pressed(KeyCode::KeyV) {
-        request_clipboard_content(commands, submit_writer);
+        request_clipboard_content(commands);
     }
 }
 
@@ -116,10 +116,7 @@ fn request_clipboard_content(mut ev_clipboard: EventWriter<ClipboardEvent>) {
 }
 
 #[cfg(target_family = "wasm")]
-fn request_clipboard_content(
-    mut commands: Commands,
-    mut ev_clipboard: EventWriter<ClipboardEvent>,
-) {
+fn request_clipboard_content(mut commands: Commands) {
     let receiver = get_clipboard_content();
     commands.spawn(ClipboardContentReceiver(receiver));
 }
