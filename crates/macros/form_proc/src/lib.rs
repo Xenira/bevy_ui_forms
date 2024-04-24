@@ -87,6 +87,11 @@ enum FormFieldType {
 
 /// Proc macro for generating a form plugin
 /// This macro is dirty and a struct should be placed in a separate file
+///
+/// # Panics
+/// - If the annotated element is not a struct
+/// - If any field is not public
+/// - If any field does not have an associated input field
 #[proc_macro_attribute]
 pub fn form_struct(_args: TokenStream, input: TokenStream) -> TokenStream {
     let parse_input = input.clone();
@@ -130,9 +135,11 @@ pub fn form_struct(_args: TokenStream, input: TokenStream) -> TokenStream {
         })
         .collect::<Vec<_>>();
 
-    if form_fields.len() != fields.len() {
-        panic!("All fields must have an associated input field");
-    }
+    assert_eq!(
+        form_fields.len(),
+        fields.len(),
+        "All fields must have an associated input field"
+    );
 
     let DeriveInput { ident, attrs, .. } = inputs;
 
@@ -157,7 +164,7 @@ pub fn form_struct(_args: TokenStream, input: TokenStream) -> TokenStream {
         &marker_component_name,
         &event_name,
         &entity_resource_name,
-        form_fields,
+        &form_fields,
     );
 
     let field_definitions = fields
@@ -348,7 +355,7 @@ fn generate_submit_system(
     form_marker_component: &Ident,
     form_event: &Ident,
     entity_resource_name: &Ident,
-    opts: Vec<FormField>,
+    opts: &[FormField],
 ) -> proc_macro2::TokenStream {
     let input_field_names = opts
         .iter()
@@ -361,17 +368,18 @@ fn generate_submit_system(
             FormFieldType::TextBox(_) => {
                 let field_name = o.form_field_opts.ident.as_ref().unwrap();
                 let input_field_name = format_ident!("{}_input", field_name);
-                match o.form_field_opts.optional {
-                    Some(true) => quote! {
-                        let #field_name = if let Ok(value) = q_text_input.get(res_form_fields.#input_field_name) {
+                if let Some(true) = o.form_field_opts.optional {
+                    quote! {
+                         let #field_name = if let Ok(value) = q_text_input.get(res_form_fields.#input_field_name) {
                             Some(value.0.clone())
                         } else {
                             None
-                        };
-                    },
-                    _ => quote! {
+                        }
+                    }
+                } else {
+                    quote! {
                         let #field_name = q_text_input.get(res_form_fields.#input_field_name).unwrap().0.clone();
-                    },
+                    }
                 }
             }
         })

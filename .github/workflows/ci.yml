@@ -35,9 +35,9 @@ jobs:
       - name: Check code formatting
         run: cargo fmt --all -- --check
       - name: Check lints
-        run: cargo clippy --all-targets --all-features --target x86_64-unknown-linux-gnu -- -Dwarnings
+        run: cargo clippy --all-targets --all-features --target x86_64-unknown-linux-gnu -- -W clippy::pedantic -Dwarnings
       - name: Check lints wasm
-        run: cargo clippy --all-targets --all-features --target wasm32-unknown-unknown -- -Dwarnings
+        run: cargo clippy --all-targets --all-features --target wasm32-unknown-unknown -- -W clippy::pedantic -Dwarnings
       - name: Run cargo-audit
         uses: actions-rs/audit-check@v1
         with:
