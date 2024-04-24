@@ -7,19 +7,21 @@ Xenira <xenira@3.141.rip>
 :icons: font
 :source-highlighter: highlight.js
 
-image:https://img.shields.io/crates/v/bevy_simple_text_input.svg[crates.io, link=https://crates.io/crates/bevy_simple_text_input]
-image:https://docs.rs/bevy_simple_text_input/badge.svg[docs, link=https://docs.rs/bevy_simple_text_input]
+image:https://img.shields.io/crates/v/bevy_ui_forms.svg[crates.io, link=https://crates.io/crates/bevy_ui_forms]
+image:https://docs.rs/bevy_ui_forms/badge.svg[docs, link=https://docs.rs/bevy_ui_forms]
 image:https://img.shields.io/badge/Bevy%20tracking-released%20version-lightblue[Following released Bevy versions, link=https://bevyengine.org/learn/book/plugin-development/#main-branch-tracking]
 
 Adds forms to `bevy_ui`.
 
 This started out as a fork of https://github.com/rparrett/bevy_simple_text_input[`bevy_simple_text_input`] with a slightly more ambitious single-line text input widget for `bevy_ui`.
 
+NOTE: While the original text input widget works well the form logic is still in developmen, might be buggy and is subject to change. This also applies to the input, as the behaviour is changed.
+
 It now includes some form logic in addition to the text input widget.
 
 There also is a macro for creating forms from a struct.
 
-![animated screenshot of text input widget gaining focus and text typed and submitted](assets/screenshot.gif)
+![animated screenshot of text input widget gaining focus and text typed and submitted](crates/core/assets/screenshot.gif)
 
 toc::[]
 
@@ -31,21 +33,21 @@ toc::[]
 - Focus (one active text input at a time and auto-focus on click)
 - Form logic
 - Form 'derive' macro
+- `Tab` key to switch between text inputs
+- `Enter` key to submit form
 
 ## Usage
 
-IMPORTANT: Code and examples in the main branch are under development and may not be compatible with the released version on crates.io. The https://github.com/rparrett/bevy_simple_text_input/tree/latest[latest] branch will contain the code from the most recent release.
+IMPORTANT: Code and examples in the main branch are under development and may not be compatible with the released version on crates.io. Make sure to switch to the corresponding tag.
 
-See https://github.com/rparrett/bevy_simple_text_input/blob/latest/examples/basic.rs[`examples/basic.rs`].
+See https://github.com/xenira/bevy_ui_forms/crates/core/examples/basic.rs[`examples/basic.rs`].
 
 ### Form macro
 
 .Macro example
 ```rust
 use bevy::prelude::*;
-use bevy_not_so_simple_text_input::form::*;
-use bevy_not_so_simple_text_input::form_struct;
-use bevy_not_so_simple_text_input::{TextInputBundle, TextInputSettings, TextInputValue};
+use bevy_ui_forms::prelude::*;
 
 #[form_struct]
 #[derive(Debug, Clone)]
@@ -55,6 +57,9 @@ pub struct LoginData {
     pub username: String,
     #[text_box(placeholder = "Password", mask = '*')]
     pub password: String,
+    #[form_field(optional)]
+    #[text_box(placeholder = "Email")]
+    pub email: Option<String>,
 }
 ```
 .Usage
@@ -94,7 +99,7 @@ fn on_form_submit(
 .Compatibility with Bevy versions
 [options="header"]
 |====
-| `bevy_not_so_simple_text_input` | `bevy`
+| `bevy_ui_forms`                 | `bevy`
 | `0.1`                           | `0.13`
 |====
 

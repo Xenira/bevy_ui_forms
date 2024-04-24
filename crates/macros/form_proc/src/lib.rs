@@ -3,9 +3,7 @@
 //! # Example
 //! ```no_run
 //! use bevy::prelude::*;
-//! use bevy_not_so_simple_text_input::form::*;
-//! use bevy_not_so_simple_text_input::form_input;
-//! use bevy_not_so_simple_text_input::{TextInputBundle, TextInputSettings, TextInputValue};
+//! use bevy_ui_forms::prelude::*;
 //!
 //! #[form_struct]
 //! #[derive(Debug, Clone)]
@@ -209,7 +207,7 @@ fn generate_plugin(
         pub(crate) struct #plugin_name;
         impl Plugin for #plugin_name {
             fn build(&self, app: &mut App) {
-                app.add_plugins(FormPlugin)
+                app
                     .add_event::<#event_name>()
                     .add_systems(Update, (setup, submit));
             }
@@ -321,7 +319,13 @@ fn generate_input_field_setup(
 
     quote! {
         let #field_name = commands.spawn((
-            NodeBundle::default(),
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    ..default()
+                },
+                ..default()
+            },
             TextInputBundle::default()
                 .with_text_style(#text_style)
                 #placeholder
@@ -409,7 +413,7 @@ fn generate_submit_system(
                             }
                         }
                     }
-                    FormEvent::Cancel => { ev_specific_form_event.send(#form_event { event: FormEvent::Cancel }); }
+                    FormEvent::Cancel(e) => { ev_specific_form_event.send(#form_event { event: FormEvent::Cancel(e) }); }
                 }
             }
         }
