@@ -86,6 +86,7 @@ fn setup(mut commands: Commands) {
         });
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn button_system(
     interaction_query: Query<&Interaction, (Changed<Interaction>, With<IncValueButton>)>,
     mut text_input_query: Query<&mut TextInputValue>,
@@ -103,6 +104,7 @@ fn button_system(
     }
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn button_style_system(
     mut interaction_query: Query<
         (&Interaction, &mut BorderColor),

@@ -1,3 +1,5 @@
+#![allow(clippy::module_name_repetitions)]
+
 use bevy::prelude::*;
 
 /// Plugin for forms consisting of multiple input fields.
@@ -121,6 +123,7 @@ pub enum FormValidationError {
     Custom(Entity, String),
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn form_element_touched(
     mut commands: Commands,
     q_form_element_touched: Query<Entity, (With<FormElementFocus>, Without<FormElementTouched>)>,
@@ -130,6 +133,7 @@ fn form_element_touched(
     }
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn form_element_invalid(
     mut commands: Commands,
     q_form_element_invalid: Query<(&Parent, &FormElementInvalid), Added<FormElementInvalid>>,
@@ -149,6 +153,7 @@ fn form_element_invalid(
     }
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn form_element_valid(
     mut commands: Commands,
     q_form_element_valid: Query<(&Parent, Entity), Added<FormElementValid>>,
@@ -172,6 +177,7 @@ fn form_element_valid(
     }
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn form_keyboard(
     mut commands: Commands,
     mut form_events: EventWriter<GenericFormEvent>,
@@ -199,7 +205,7 @@ fn form_keyboard(
         let (_, children, _) = form.unwrap();
         let focus_order = q_focused
             .get_single()
-            .map(|(_, order)| order.map(|o| o.0).unwrap_or(0))
+            .map(|(_, order)| order.map_or(0, |o| o.0))
             .unwrap_or(0);
 
         let order = children

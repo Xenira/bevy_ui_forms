@@ -98,7 +98,7 @@ impl Plugin for TextInputPlugin {
     }
 }
 
-const CURSOR_HANDLE: Handle<Font> = Handle::weak_from_u128(10482756907980398621);
+const CURSOR_HANDLE: Handle<Font> = Handle::weak_from_u128(10_482_756_907_980_398_621);
 
 /// A bundle providing the additional components required for a text input.
 ///
@@ -137,6 +137,7 @@ impl TextInputBundle {
     /// Returns this [`TextInputBundle`] with a new [`TextInputValue`] containing the provided `String`.
     ///
     /// This also sets [`TextInputCursorPos`] so that the cursor position is at the end of the provided `String`.
+    #[must_use]
     pub fn with_value(mut self, value: impl Into<String>) -> Self {
         let owned = value.into();
 
@@ -147,6 +148,7 @@ impl TextInputBundle {
     }
 
     /// Returns this [`TextInputBundle`] with a new [`TextInputPlaceholder`] containing the provided `String`.
+    #[must_use]
     pub fn with_placeholder(
         mut self,
         placeholder: impl Into<String>,
@@ -160,18 +162,21 @@ impl TextInputBundle {
     }
 
     /// Returns this [`TextInputBundle`] with a new [`TextInputTextStyle`] containing the provided Bevy `TextStyle`.
+    #[must_use]
     pub fn with_text_style(mut self, text_style: TextStyle) -> Self {
         self.text_style = TextInputTextStyle(text_style);
         self
     }
 
     /// Returns this [`TextInputBundle`] with a new [`TextInputInactive`] containing the provided `bool`.
+    #[must_use]
     pub fn with_active(mut self, active: bool) -> Self {
         self.active = TextInputActive(active);
         self
     }
 
     /// Returns this [`TextInputBundle`] with a new [`TextInputSettings`].
+    #[must_use]
     pub fn with_settings(mut self, settings: TextInputSettings) -> Self {
         self.settings = settings;
         self
@@ -228,7 +233,7 @@ pub struct TextInputPlaceholder {
 impl TextInputPlaceholder {
     /// Returns the style to use when rendering the placeholder text.
     /// Uses the own style if it exists, otherwise uses the input style with quarter opacity.
-    pub fn get_style(&self, input_text_style: &TextStyle) -> TextStyle {
+    pub(crate) fn get_style(&self, input_text_style: &TextStyle) -> TextStyle {
         if let Some(style) = &self.text_style {
             style.clone()
         } else {
@@ -277,6 +282,7 @@ impl<'w, 's> InnerText<'w, 's> {
     }
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn keyboard(
     mut events: EventReader<KeyboardInput>,
     res_keys: Res<ButtonInput<KeyCode>>,
@@ -424,6 +430,7 @@ fn update_value(
     }
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn validate(
     mut commands: Commands,
     q_text_input: Query<
@@ -463,6 +470,7 @@ fn clipboard(
     }
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn create(
     mut commands: Commands,
     query: Query<
@@ -489,11 +497,7 @@ fn create(
             TextSection {
                 style: TextStyle {
                     font: CURSOR_HANDLE,
-                    color: if !active.0 {
-                        Color::NONE
-                    } else {
-                        style.0.color
-                    },
+                    color: if active.0 { style.0.color } else { Color::NONE },
                     ..style.0.clone()
                 },
                 ..default()
@@ -565,16 +569,13 @@ fn show_hide_cursor(
             continue;
         };
 
-        text.sections[1].style.color = if !active.0 {
-            Color::NONE
-        } else {
-            style.0.color
-        };
+        text.sections[1].style.color = if active.0 { style.0.color } else { Color::NONE };
 
         cursor_timer.timer.reset();
     }
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn focus_interaction(
     mut commands: Commands,
     q_interaction: Query<(Entity, &Interaction)>,
@@ -589,7 +590,7 @@ fn focus_interaction(
             commands.entity(interacted_entity).insert(FormElementFocus);
             active.0 = true;
         } else {
-            for (interacted_entity, mut active) in q_text_input.iter_mut() {
+            for (interacted_entity, mut active) in &mut q_text_input {
                 commands
                     .entity(interacted_entity)
                     .remove::<FormElementFocus>();
@@ -599,6 +600,7 @@ fn focus_interaction(
     }
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn focus_added(
     mut commands: Commands,
     q_focus_added: Query<Entity, Added<FormElementFocus>>,
@@ -618,6 +620,7 @@ fn focus_added(
 }
 
 // Blinks the cursor on a timer.
+#[allow(clippy::needless_pass_by_value)]
 fn blink_cursor(
     mut input_query: Query<
         (Entity, &TextInputTextStyle, &mut TextInputCursorTimer),
@@ -644,14 +647,15 @@ fn blink_cursor(
             continue;
         };
 
-        if text.sections[1].style.color != Color::NONE {
-            text.sections[1].style.color = Color::NONE;
-        } else {
+        if text.sections[1].style.color == Color::NONE {
             text.sections[1].style.color = style.0.color;
+        } else {
+            text.sections[1].style.color = Color::NONE;
         }
     }
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn set_placeholder(
     mut commands: Commands,
     q_text_changed: Query<
@@ -749,7 +753,7 @@ fn remove_char_at(input: &str, index: usize) -> String {
     input
         .chars()
         .enumerate()
-        .filter_map(|(i, c)| if i != index { Some(c) } else { None })
+        .filter_map(|(i, c)| if i == index { None } else { Some(c) })
         .collect()
 }
 

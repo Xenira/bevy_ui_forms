@@ -1,3 +1,5 @@
+#![allow(clippy::module_name_repetitions)]
+
 #[cfg(not(target_family = "wasm"))]
 use arboard::Clipboard;
 use bevy::prelude::*;
@@ -37,6 +39,7 @@ pub enum ClipboardEvent {
 }
 
 #[cfg(not(target_family = "wasm"))]
+#[allow(clippy::needless_pass_by_value)]
 fn keyboard(keys: Res<ButtonInput<KeyCode>>, mut submit_writer: EventWriter<ClipboardEvent>) {
     if keys.just_pressed(KeyCode::Insert) {
         request_clipboard_content(submit_writer);
@@ -63,6 +66,7 @@ fn keyboard(keys: Res<ButtonInput<KeyCode>>, mut submit_writer: EventWriter<Clip
 }
 
 #[cfg(target_family = "wasm")]
+#[allow(clippy::needless_pass_by_value)]
 fn keyboard(
     commands: Commands,
     keys: Res<ButtonInput<KeyCode>>,
@@ -93,6 +97,7 @@ fn keyboard(
 }
 
 #[cfg(target_family = "wasm")]
+#[allow(clippy::needless_pass_by_value)]
 fn async_clipboard(
     mut commands: Commands,
     q_clipboard_content: Query<(Entity, &ClipboardContentReceiver)>,
