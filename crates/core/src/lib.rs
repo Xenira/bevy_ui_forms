@@ -2,16 +2,16 @@
 //!
 //! # Examples
 //!
-//! See the [examples](https://github.com/rparrett/bevy_simple_text_input/tree/latest/examples) folder.
+//! See the [examples](https://github.com/xenira/bevy_ui_forms/crates/core/examples) folder.
 //!
 //! ```no_run
 //! use bevy::prelude::*;
-//! use bevy_simple_text_input::{TextInputBundle, TextInputPlugin};
+//! use bevy_ui_forms::{prelude::*, BevyUiFormsPlugins};
 //!
 //! fn main() {
 //!     App::new()
 //!         .add_plugins(DefaultPlugins)
-//!         .add_plugins(TextInputPlugin)
+//!         .add_plugins(BevyUiFormsPlugins)
 //!         .add_systems(Startup, setup)
 //!         .run();
 //! }

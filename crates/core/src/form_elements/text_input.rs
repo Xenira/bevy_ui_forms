@@ -73,7 +73,7 @@ const CURSOR_HANDLE: Handle<Font> = Handle::weak_from_u128(10_482_756_907_980_39
 ///
 /// ```rust
 /// # use bevy::prelude::*;
-/// use bevy_simple_text_input::TextInputBundle;
+/// use bevy_ui_forms::prelude::*;
 /// fn setup(mut commands: Commands) {
 ///     commands.spawn((NodeBundle::default(), TextInputBundle::default()));
 /// }

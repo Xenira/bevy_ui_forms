@@ -3,9 +3,7 @@
 //! # Example
 //! ```no_run
 //! use bevy::prelude::*;
-//! use bevy_not_so_simple_text_input::form::*;
-//! use bevy_not_so_simple_text_input::form_input;
-//! use bevy_not_so_simple_text_input::{TextInputBundle, TextInputSettings, TextInputValue};
+//! use bevy_ui_forms::prelude::*;
 //!
 //! #[form_struct]
 //! #[derive(Debug, Clone)]
