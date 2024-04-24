@@ -990,13 +990,13 @@ dependencies = [
  "arboard",
  "async-channel",
  "bevy",
- "bevy_ui_forms_form_derive",
+ "bevy_ui_forms_form_proc",
  "wasm-bindgen-futures",
  "web-sys",
 ]
 
 [[package]]
-name = "bevy_ui_forms_form_derive"
+name = "bevy_ui_forms_form_proc"
 version = "0.1.0"
 dependencies = [
  "darling",
