@@ -1,7 +1,7 @@
 //! An example showing a very basic implementation.
 
 use bevy::prelude::*;
-use bevy_ui_forms::{TextInputBundle, TextInputPlugin, TextInputSubmitEvent};
+use bevy_ui_forms::prelude::*;
 
 const BORDER_COLOR_ACTIVE: Color = Color::rgb(0.75, 0.52, 0.99);
 const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
