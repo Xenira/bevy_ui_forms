@@ -57,6 +57,19 @@ pub struct FormElementOptional;
 #[derive(Component, Reflect)]
 pub struct FormElementOrder(pub usize);
 
+/// Style of a form element.
+#[derive(Component, Default, Clone, Debug, Reflect)]
+pub struct FormElementStyle {
+    /// The style of the node.
+    pub style: Style,
+    /// Optional image to display.
+    pub image: Option<Handle<Image>>,
+    /// Optional scale mode for the image.
+    pub image_scale_mode: Option<ImageScaleMode>,
+    /// Optional color for the background.
+    pub background_color: Option<BackgroundColor>,
+}
+
 #[allow(clippy::needless_pass_by_value)]
 fn form_element_touched(
     mut commands: Commands,

@@ -34,16 +34,21 @@ pub mod form_element;
 pub mod form_elements;
 
 use bevy::app::{PluginGroup, PluginGroupBuilder};
+
 /// Derive macro available if serde is built with `features = ["derive"]`.
 #[cfg(feature = "derive")]
 pub use bevy_ui_forms_form_proc::form_struct;
+#[cfg(feature = "derive")]
+pub use bevy_ui_forms_form_proc::FormActions;
 
 /// Re-export common use items for easy access.
 pub mod prelude {
     pub use crate::form::*;
     pub use crate::form_element::*;
+    pub use crate::form_elements::button::*;
     pub use crate::form_elements::text_input::*;
     pub use crate::form_struct;
+    pub use crate::FormActions;
 }
 
 /// Plugin group for all `bevy_ui_forms` plugins.

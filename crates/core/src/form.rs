@@ -2,6 +2,8 @@
 
 use bevy::prelude::*;
 
+use crate::prelude::FormButtonBundle;
+
 /// Plugin for forms consisting of multiple input fields.
 pub struct FormPlugin;
 
@@ -52,8 +54,12 @@ pub struct GenericFormEvent {
 pub enum FormEvent<T> {
     /// Submit event with the form data.
     Submit(T),
+    /// Apply event.
+    Apply(T),
     /// Cancel event.
     Cancel(Entity),
+    /// Custom event with a message.
+    Custom(Entity, String, Option<T>),
 }
 
 /// Event that is sent when a form is validated.
@@ -76,6 +82,40 @@ pub enum FormValidationError {
     Invalid(Entity),
     /// Custom error with a message.
     Custom(Entity, String),
+}
+
+/// Actions that can be performed on a form.
+#[derive(Hash, PartialEq, Eq, Debug, Clone)]
+pub enum FormEventAction {
+    /// Submit the form.
+    Submit,
+    /// Apply the form.
+    Apply,
+    /// Cancel the form.
+    Cancel,
+    /// Custom action with a message.
+    Custom(String),
+}
+
+/// Numeric id for form actions.
+#[derive(Component)]
+pub struct FormActionId(pub usize);
+
+/// Trait for converting a type into form actions.
+/// Use this for actions enum
+pub trait FormActions: Sized {
+    /// The backing struct for the form.
+    type FormEntity;
+
+    /// Converts the type into form actions.
+    /// Should return a hashmap of the variant and the corresponding form action.
+    fn get_button_bundles(form: Entity) -> Vec<FormButtonBundle>;
+
+    /// Converts the type into form actions.
+    ///
+    /// # Errors
+    /// Returns an error if the id is not found or the entity is missing on a variant, that requires it.
+    fn from_id_and_data(id: usize, entity: Option<Self::FormEntity>) -> Result<Self, String>;
 }
 
 #[allow(clippy::needless_pass_by_value)]
