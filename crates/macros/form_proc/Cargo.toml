@@ -17,7 +17,7 @@ rust-version = "1.64.0"
 darling = "0.20.8"
 proc-macro2 = "1.0.81"
 quote = "1.0.36"
-syn = { version = "2.0.60", features = ["full"] }
+syn = { version = "2.0.63", features = ["full"] }
 
 [lib]
 proc-macro = true
