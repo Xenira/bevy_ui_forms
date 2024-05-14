@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0](https://github.com/Xenira/bevy_ui_forms/compare/bevy_ui_forms-v0.1.0...bevy_ui_forms-v0.2.0) - 2024-05-14
+
+### Added
+- *(button)* add button form element ([#11](https://github.com/Xenira/bevy_ui_forms/pull/11))
+
 ## [0.1.0](https://github.com/Xenira/bevy_ui_forms/releases/tag/bevy_ui_forms-v0.1.0) - 2024-04-24
 
 ### Added

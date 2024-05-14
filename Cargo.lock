@@ -985,7 +985,7 @@ dependencies = [
 
 [[package]]
 name = "bevy_ui_forms"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "arboard",
  "async-channel",
@@ -997,7 +997,7 @@ dependencies = [
 
 [[package]]
 name = "bevy_ui_forms_form_proc"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "darling",
  "proc-macro2",
