@@ -7,6 +7,15 @@ Xenira <xenira@3.141.rip>
 :icons: font
 :source-highlighter: highlight.js
 
+////
+
+Hello crates.io user o/
+
+If you can read this, crater.io is still not supporting asciidoc, so the documentation is not rendered correctly.
+Please view the readme on the github page: https://github.com/xenira/bevy_ui_forms
+
+////
+
 image:https://img.shields.io/crates/v/bevy_ui_forms.svg[crates.io, link=https://crates.io/crates/bevy_ui_forms]
 image:https://docs.rs/bevy_ui_forms/badge.svg[docs, link=https://docs.rs/bevy_ui_forms]
 image:https://img.shields.io/badge/Bevy%20tracking-released%20version-lightblue[Following released Bevy versions, link=https://bevyengine.org/learn/book/plugin-development/#main-branch-tracking]
@@ -100,7 +109,7 @@ fn on_form_submit(
 [options="header"]
 |====
 | `bevy_ui_forms`                 | `bevy`
-| `0.1`                           | `0.13`
+| `0.1` - `latest`                | `0.13`
 |====
 
 ## Contributing

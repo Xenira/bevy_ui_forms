@@ -44,7 +44,7 @@ impl Plugin for TextInputPlugin {
                     update_value.after(keyboard).after(clipboard),
                     #[cfg(not(feature = "clipboard"))]
                     update_value.after(keyboard),
-                    validate.after(update_value),
+                    validate.after(create).after(update_value),
                     focus_interaction,
                     focus_added.after(focus_interaction),
                     blink_cursor,
@@ -400,7 +400,7 @@ fn validate(
     mut commands: Commands,
     q_text_input: Query<
         (Entity, &TextInputValue, Option<&FormElementOptional>),
-        Changed<TextInputValue>,
+        Or<(Added<TextInputValue>, Changed<TextInputValue>)>,
     >,
 ) {
     for (entity, text_input, optional) in &q_text_input {
