@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1](https://github.com/Xenira/bevy_ui_forms/compare/bevy_ui_forms_form_proc-v0.2.0...bevy_ui_forms_form_proc-v0.2.1) - 2024-05-15
+
+### Fixed
+- *(macro)* fix syntax error for optional fields ([#15](https://github.com/Xenira/bevy_ui_forms/pull/15))
+
 ## [0.2.0](https://github.com/Xenira/bevy_ui_forms/compare/bevy_ui_forms_form_proc-v0.1.0...bevy_ui_forms_form_proc-v0.2.0) - 2024-05-14
 
 ### Added

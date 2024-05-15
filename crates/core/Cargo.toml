@@ -14,7 +14,7 @@ authors.workspace = true
 rust-version = "1.76.0"
 
 [dependencies]
-bevy_ui_forms_form_proc = { version = "0.2.0", optional = true, path = "../macros/form_proc" }
+bevy_ui_forms_form_proc = { version = "0.2.1", optional = true, path = "../macros/form_proc" }
 
 [dependencies.bevy]
 version = "0.13"
