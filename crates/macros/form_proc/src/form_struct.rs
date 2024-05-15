@@ -342,7 +342,7 @@ fn generate_input_field_setup(
         .optional
         .as_ref()
         .filter(|optional| **optional)
-        .map(|_| quote! { FormElementOptional })
+        .map(|_| quote! { FormElementOptional, })
         .unwrap_or_default();
 
     let text_style = text_box_opts
@@ -459,7 +459,7 @@ fn generate_submit_system(
                             Some(value.0.clone())
                         } else {
                             None
-                        }
+                        };
                     }
                 } else {
                     quote! {
